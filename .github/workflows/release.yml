@@ -20,9 +20,20 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
       - name: Publish package
-        run: mvn --batch-mode deploy
+        run: |
+          mvn --batch-mode deploy
+          echo "LAST_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)" >> $GITHUB_ENV
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/checkout@v2
+      - name: Merge to main
+        uses: devmasx/merge-branch@v1.3.1
+        with:
+          type: now
+          from_branch: ${{ env.LAST_TAG }}
+          target_branch: main
+          github_token: ${{ github.token }}
 
 #jobs:
 #
