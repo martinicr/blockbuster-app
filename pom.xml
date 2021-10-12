@@ -26,6 +26,13 @@
     <mysql.jdbc.version>8.0.22</mysql.jdbc.version>
   </properties>
 
+  <scm>
+    <url>https://github.com/martinicr/blockbuster-app.git</url>
+    <connection>scm:git:${project.scm.url}</connection>
+    <developerConnection>scm:git:${project.scm.url}</developerConnection>
+    <tag>HEAD</tag>
+  </scm>
+
   <dependencies>
 
     <dependency>
