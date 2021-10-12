@@ -1,0 +1,53 @@
+
+name: Release
+
+on:
+  push:
+    tags:
+      - v1.*
+
+
+jobs:
+
+  new-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v2
+      - name: Cache local Maven repository
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven-
+      - name: Setup Java JDK
+        uses: actions/setup-java@v1.4.3
+        with:
+          java-version: 11
+          server-id: github
+      - name: Configure Git user
+        shell: bash
+        run: |
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions"
+          git config --global author.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git config --global author.name "${GITHUB_ACTOR}"
+      - name: Publish JAR
+        run: |
+          mvn -B release:prepare release:perform
+          echo "LAST_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)" >> $GITHUB_ENV
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_ACTOR: ${{ github.actor }}
+      - name: Rollback if failure
+        if: ${{ failure() }}
+        run: mvn -B release:rollback
+
+      - uses: actions/checkout@v2
+      - name: Merge to main
+        uses: devmasx/merge-branch@v1.3.1
+        with:
+          type: now
+          from_branch: ${{ env.LAST_TAG }}
+          target_branch: main
+          github_token: ${{ github.token }}
