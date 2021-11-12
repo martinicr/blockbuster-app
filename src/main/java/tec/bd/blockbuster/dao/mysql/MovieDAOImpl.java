@@ -15,7 +15,10 @@ public class MovieDAOImpl extends GenericMySqlDAOImpl<Movie, Long> implements Mo
 
     private static final String SQL_FIND_ALL_MOVIES = "select codigo, titulo, fecha_lanzamiento, categoria from pelicula";
     private static final String SQL_FIND_BY_ID_MOVIE = "select codigo, titulo, fecha_lanzamiento, categoria from pelicula where codigo = ?";
+    private static final String SQL_FIND_BY_TITLE = "select codigo, titulo, fecha_lanzamiento, categoria from pelicula where titulo like ?";
     private static final String SQL_INSERT_MOVIE = "insert into pelicula(titulo, fecha_lanzamiento, categoria) values (?, ?, ?)";
+
+    private static final String PROC_DELETE_MOVIE = "{call delete_movie(?)}";
 
     private final DataSource dataSource;
 
@@ -67,7 +70,24 @@ public class MovieDAOImpl extends GenericMySqlDAOImpl<Movie, Long> implements Mo
 
     @Override
     public Optional<Movie> findByTitle(String title) {
-        return null;
+        Connection dbConnection = null;
+        try {
+            dbConnection = this.dataSource.getConnection();
+            var stmt = dbConnection.prepareStatement(SQL_FIND_BY_TITLE);
+            stmt.setString(1, title );
+            var resultSet = stmt.executeQuery();
+            if(resultSet.next()) {
+                return Optional.of(resultSetToEntity(resultSet));
+            }
+        } catch (Exception e) {
+            try {
+                System.out.println(e.getMessage());
+                dbConnection.rollback();
+            } catch (SQLException sqlEx) {
+                throw new RuntimeException(sqlEx);
+            }
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -93,10 +113,9 @@ public class MovieDAOImpl extends GenericMySqlDAOImpl<Movie, Long> implements Mo
     @Override
     public void delete(Long movieId) {
         Connection dbConnection = null;
-        String procedureDefinition = "{call delete_movie(?)}";
         try {
             dbConnection = this.dataSource.getConnection();
-            CallableStatement stmt = dbConnection.prepareCall(procedureDefinition);
+            CallableStatement stmt = dbConnection.prepareCall(PROC_DELETE_MOVIE);
             stmt.setLong(1, movieId);
             stmt.executeUpdate();
 

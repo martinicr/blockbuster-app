@@ -2,15 +2,13 @@ package tec.bd.blockbuster.cli;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.HelpCommand;
-import tec.bd.blockbuster.cli.movie.CreateMovieCommand;
-import tec.bd.blockbuster.cli.movie.DeleteMovieCommand;
-import tec.bd.blockbuster.cli.movie.GetMoviesCommand;
-import tec.bd.blockbuster.cli.movie.UpdateMovieCommand;
+import tec.bd.blockbuster.cli.movie.*;
 
 @Command(
         name = "BlockbusterAPP",
         subcommands = {
                 GetMoviesCommand.class,
+                GetByTitleCommand.class,
                 CreateMovieCommand.class,
                 DeleteMovieCommand.class,
                 UpdateMovieCommand.class,

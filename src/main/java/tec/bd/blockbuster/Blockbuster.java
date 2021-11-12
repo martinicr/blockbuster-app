@@ -6,44 +6,47 @@ import tec.bd.blockbuster.entity.Movie;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 public class Blockbuster {
 
-    private List<Movie> movieDB;
     private MovieDAO movieDAO;
-
-    public Blockbuster() {
-        this.movieDB = new ArrayList<>();
-    }
 
     public Blockbuster(MovieDAO movieDAO) {
         this.movieDAO = movieDAO;
     }
 
-
+    /**
+     * Lista todas las peliculas
+     * @return
+     */
     public List<Movie> getAllMovies() {
         return this.movieDAO.findAll();
     }
 
+    /**
+     * Agrega una pelicula
+     * @param movie
+     */
     public void addNewMovie(Movie movie) {
         this.movieDAO.save(movie);
     }
 
+    /**
+     * Obtiene una pelicula por titulo
+     * @param movieName
+     * @return
+     */
     public Movie getMovie(String movieName) {
-        return this.movieDB
-                .stream()
-                .filter(m -> m.getTitle().equals(movieName))
-                .findFirst()
-                .orElse(null);
+        return this.movieDAO.findByTitle(movieName).orElse(null);
     }
 
+    /**
+     * Obtiene una pelicula por movieId
+     * @param movieId
+     * @return
+     */
     public Movie getMovie(long movieId) {
-        return this.movieDB
-                .stream()
-                .filter(m -> m.getMovieId() == movieId)
-                .findFirst()
-                .orElse(null);
+        return this.movieDAO.findById(movieId).orElse(null);
     }
 
     public void editMovieTitle(String currentMovieName, String newMovieName) {
@@ -51,6 +54,10 @@ public class Blockbuster {
         movie.setTitle(newMovieName);
     }
 
+    /**
+     * Borra una pelicula
+     * @param movieId
+     */
     public void remove(long movieId) {
         this.movieDAO.delete(movieId);
     }
