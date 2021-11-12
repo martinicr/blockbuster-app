@@ -51,4 +51,8 @@ public class Blockbuster {
         movie.setTitle(newMovieName);
     }
 
+    public void remove(long movieId) {
+        this.movieDAO.delete(movieId);
+    }
+
 }

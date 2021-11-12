@@ -4,10 +4,7 @@ import tec.bd.blockbuster.dao.MovieDAO;
 import tec.bd.blockbuster.entity.Movie;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.ResultSet;
+import java.sql.*;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -17,6 +14,7 @@ import java.util.Optional;
 public class MovieDAOImpl extends GenericMySqlDAOImpl<Movie, Long> implements MovieDAO {
 
     private static final String SQL_FIND_ALL_MOVIES = "select codigo, titulo, fecha_lanzamiento, categoria from pelicula";
+    private static final String SQL_FIND_BY_ID_MOVIE = "select codigo, titulo, fecha_lanzamiento, categoria from pelicula where codigo = ?";
     private static final String SQL_INSERT_MOVIE = "insert into pelicula(titulo, fecha_lanzamiento, categoria) values (?, ?, ?)";
 
     private final DataSource dataSource;
@@ -47,7 +45,24 @@ public class MovieDAOImpl extends GenericMySqlDAOImpl<Movie, Long> implements Mo
 
     @Override
     public Optional<Movie> findById(Long movieId) {
-        return null;
+        Connection dbConnection = null;
+        try {
+            dbConnection = this.dataSource.getConnection();
+            var stmt = dbConnection.prepareStatement(SQL_FIND_BY_ID_MOVIE);
+            stmt.setInt(1, 1);
+            var resultSet = stmt.executeQuery();
+            if(resultSet.next()) {
+                return Optional.of(resultSetToEntity(resultSet));
+            }
+        } catch (Exception e) {
+            try {
+                System.out.println(e.getMessage());
+                dbConnection.rollback();
+            } catch (SQLException sqlEx) {
+                throw new RuntimeException(sqlEx);
+            }
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -77,7 +92,19 @@ public class MovieDAOImpl extends GenericMySqlDAOImpl<Movie, Long> implements Mo
 
     @Override
     public void delete(Long movieId) {
+        Connection dbConnection = null;
+        String procedureDefinition = "{call delete_movie(?)}";
+        try {
+            dbConnection = this.dataSource.getConnection();
+            CallableStatement stmt = dbConnection.prepareCall(procedureDefinition);
+            stmt.setLong(1, movieId);
+            stmt.executeUpdate();
 
+        } catch (Exception e) {
+            e.printStackTrace(); // no recomendado
+
+            throw new RuntimeException("Can't delete movie id " + movieId, e);
+        }
     }
 
     @Override

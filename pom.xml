@@ -24,9 +24,17 @@
     <logback.version>1.2.3</logback.version>
     <mockito.version>3.8.0</mockito.version>
     <mysql.jdbc.version>8.0.22</mysql.jdbc.version>
+    <picocli.version>4.6.1</picocli.version>
   </properties>
 
   <dependencies>
+
+    <dependency>
+      <groupId>info.picocli</groupId>
+      <artifactId>picocli</artifactId>
+      <version>${picocli.version}</version>
+    </dependency>
+
 
     <dependency>
       <groupId>ch.qos.logback</groupId>
@@ -162,7 +170,7 @@
           </execution>
         </executions>
         <configuration>
-          <mainClass>tec.bd.blockbuster.App</mainClass>
+          <mainClass>tec.bd.blockbuster.Main</mainClass>
           <cleanupDaemonThreads>false</cleanupDaemonThreads>
         </configuration>
       </plugin>

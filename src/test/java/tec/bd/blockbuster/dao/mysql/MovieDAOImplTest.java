@@ -35,4 +35,11 @@ public class MovieDAOImplTest extends BaseMySqlTest {
         assertThat(movies).hasSize(5);
     }
 
+    @Test
+    public void findById() {
+        var movie = this.movieDAO.findById(1L);
+
+        assertThat(movie.isPresent()).isTrue();
+    }
+
 }
